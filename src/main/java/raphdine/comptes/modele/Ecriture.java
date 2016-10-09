@@ -5,6 +5,7 @@
  */
 package raphdine.comptes.modele;
 
+import java.math.BigDecimal;
 import java.util.Calendar;
 import javax.persistence.*;
 import raphdine.comptes.utils.DateUtils;
@@ -33,10 +34,10 @@ public class Ecriture {
     private String intitule;
 
     @Column
-    private Float debit;
+    private BigDecimal debit;
 
     @Column
-    private Float credit;
+    private BigDecimal credit;
 
     @Column
     private String remboursement;
@@ -99,28 +100,28 @@ public class Ecriture {
     /**
      * @return the debit
      */
-    public Float getDebit() {
+    public BigDecimal getDebit() {
         return debit;
     }
 
     /**
      * @param debit the debit to set
      */
-    public void setDebit(Float debit) {
+    public void setDebit(BigDecimal debit) {
         this.debit = debit;
     }
 
     /**
      * @return the credit
      */
-    public Float getCredit() {
+    public BigDecimal getCredit() {
         return credit;
     }
 
     /**
      * @param credit the credit to set
      */
-    public void setCredit(Float credit) {
+    public void setCredit(BigDecimal credit) {
         this.credit = credit;
     }
 

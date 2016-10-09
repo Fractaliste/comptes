@@ -6,6 +6,7 @@
 package raphdine.comptes.ihm.tableau;
 
 import java.awt.Component;
+import java.math.BigDecimal;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableCellRenderer;
 
@@ -19,8 +20,8 @@ public class EuroCellRenderer extends DefaultTableCellRenderer {
     public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
         String text = "";
 
-        if (value instanceof Float) {
-            text = (Float) value + " €";
+        if (value instanceof BigDecimal) {
+            text = ((BigDecimal) value).toPlainString() + " €";
         }
         return super.getTableCellRendererComponent(table, text, isSelected, hasFocus, row, column);
     }

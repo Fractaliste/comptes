@@ -22,7 +22,7 @@ public class Comptes {
      */
     public static void main(String[] args) {
 
-        importExcel();;
+//        importExcel();
 
         /* Set the Nimbus look and feel */
         //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
@@ -60,7 +60,7 @@ public class Comptes {
 
     private static void importExcel() {
         new ImportExcel().run();
-        System.exit(0);
+//        System.exit(0);
     }
 
 }

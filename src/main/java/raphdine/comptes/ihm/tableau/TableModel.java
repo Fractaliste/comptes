@@ -5,6 +5,7 @@
  */
 package raphdine.comptes.ihm.tableau;
 
+import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 import javax.swing.table.AbstractTableModel;
@@ -13,6 +14,7 @@ import raphdine.comptes.modele.Ecriture;
 import raphdine.comptes.service.ICompteService;
 import raphdine.comptes.service.ServiceLocator;
 import raphdine.comptes.utils.DateUtils;
+import raphdine.comptes.utils.Logger;
 
 /**
  *
@@ -20,6 +22,7 @@ import raphdine.comptes.utils.DateUtils;
  */
 public class TableModel extends AbstractTableModel {
 
+    private static final Logger LOGGER = Logger.getInstance();
     private final static ICompteService SERVICE = ServiceLocator.getInstance().getComptesService();
 
     private List<Ecriture> ecritures;
@@ -84,19 +87,24 @@ public class TableModel extends AbstractTableModel {
                 ecriture.setIntitule((String) aValue);
                 break;
             case DEBIT:
-                ecriture.setDebit(Float.parseFloat((String) aValue));
+                ecriture.setDebit((BigDecimal) aValue);
                 break;
             case CREDIT:
-                ecriture.setCredit(Float.parseFloat((String) aValue));
+                ecriture.setCredit((BigDecimal) aValue);
                 break;
         }
         save(ecriture);
     }
 
-    private float getTotal(Ecriture ecriture, int row) {
-        return ((row == 0) ? 0 : getTotal(getEcriture(row - 1), row - 1))
-                + ((ecriture.getCredit() == null) ? 0 : ecriture.getCredit())
-                - ((ecriture.getDebit() == null) ? 0 : ecriture.getDebit());
+    private BigDecimal getTotal(Ecriture ecriture, int row) {
+        BigDecimal total = (row == 0) ? BigDecimal.ZERO : getTotal(getEcriture(row - 1), row - 1);
+        if (ecriture.getCredit() != null) {
+            total = total.add(ecriture.getCredit());
+        }
+        if (ecriture.getDebit() != null) {
+            total = total.subtract(ecriture.getDebit());
+        }
+        return total;
     }
 
     private List<Ecriture> getEcritures() {

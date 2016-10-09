@@ -10,6 +10,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import org.apache.poi.EncryptedDocumentException;
@@ -36,6 +37,8 @@ public class ImportExcel {
     private static final String LOG_FILE = "target\\import_comptes.log";
     private final String path;
     private final ByteArrayOutputStream bos = new ByteArrayOutputStream();
+
+    private int chequeCount = 0;
 
     public ImportExcel() {
         path = "src\\main\\resources\\Comptes.xlsx";
@@ -104,13 +107,17 @@ public class ImportExcel {
                 e.setPasseEnBanque(Boolean.TRUE);
             }
             if (row.getCell(6) != null) {
-                e.setDebit((float) row.getCell(6).getNumericCellValue());
+                final float debit = (float) row.getCell(6).getNumericCellValue();
+                BigDecimal bD = new BigDecimal(debit);
+                e.setDebit(debit == 0 ? null : bD);
             }
             if (row.getCell(7) != null) {
-                e.setCredit((float) row.getCell(7).getNumericCellValue());
+                final float credit = (float) row.getCell(7).getNumericCellValue();
+                BigDecimal bD = new BigDecimal(credit);
+                e.setCredit(credit == 0 ? null : bD);
             }
-            if (row.getCell(6) != null && row.getCell(7) != null || row.getCell(6) == null && row.getCell(7) == null) {
-                LOGGER.error("Erreur de cohérence débit {}/crédit {} ({},{})", row.getCell(6), row.getCell(7), row.getCell(6) != null && row.getCell(7) != null, row.getCell(6) == null && row.getCell(7) == null);
+            if (e.getCredit() == null && e.getDebit() == null || e.getCredit() != null && e.getDebit() != null) {
+                LOGGER.error("Erreur de cohérence débit {}/crédit {} ({},{})", e.getDebit(), e.getCredit(), row.getCell(6) != null && row.getCell(7) != null, row.getCell(6) == null && row.getCell(7) == null);
                 throw new IllegalArgumentException("Erreur de cohérence débit/crédit");
             }
             return e;
@@ -156,6 +163,8 @@ public class ImportExcel {
         switch (stringCellValue) {
             case "Emprunt":
                 return CategorieEnum.EMPRUNT;
+            case "Impôts":
+                return CategorieEnum.IMPOT;
             case "Enseignement":
                 return CategorieEnum.ENSEIGNEMENT;
             case "Epargne":
@@ -194,15 +203,15 @@ public class ImportExcel {
                 return CategorieEnum.RESTAURANT_HOTEL_SORTIE;
         }
         LOGGER.debug("Categorie manquante {}", stringCellValue);
-        appendLogFile(stringCellValue);
+        appendLogFile("Categorie manquante " + stringCellValue);
         return null;
     }
 
     private String extractNumeroCheque(double numericCellValue) {
         if (numericCellValue > 0) {
-            appendLogFile("" + numericCellValue);
+            appendLogFile("#" + ++chequeCount + " => " + numericCellValue);
         }
-        return String.valueOf(numericCellValue);
+        return String.valueOf((int) numericCellValue);
     }
 
     private void save(Ecriture ecriture) {
@@ -210,5 +219,6 @@ public class ImportExcel {
             return;
         }
         LOGGER.debug("Enregistrement de l'écriture {}", ecriture);
+        ServiceLocator.getInstance().getComptesService().update(ecriture);
     }
 }
